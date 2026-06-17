@@ -1,0 +1,851 @@
+﻿<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>紫花苜蓿密码子优化工具</title>
+  <style>
+:root {
+  --ink: #17201c;
+  --muted: #66736c;
+  --line: #d9e2dc;
+  --leaf: #1f8f5f;
+  --leaf-dark: #126642;
+  --gold: #d99a1c;
+  --rose: #b14e63;
+  --paper: #fbfcf9;
+  --panel: #ffffff;
+  --wash: #edf6f0;
+  --shadow: 0 18px 45px rgba(31, 65, 46, 0.12);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: var(--ink);
+  font-family: Arial, "Microsoft YaHei", sans-serif;
+  background:
+    radial-gradient(circle at 8% 12%, rgba(31, 143, 95, 0.12), transparent 28rem),
+    linear-gradient(135deg, #f7faf2 0%, #eef6f5 48%, #f9f5ec 100%);
+}
+
+button, input, select, textarea {
+  font: inherit;
+}
+
+.app-shell {
+  width: min(1260px, calc(100vw - 36px));
+  margin: 0 auto;
+  padding: 28px 0;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  align-items: end;
+  padding: 26px 0 22px;
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  color: var(--leaf-dark);
+  font-size: 13px;
+  letter-spacing: 0;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+h1, h2, h3, p {
+  margin-top: 0;
+}
+
+h1 {
+  margin-bottom: 0;
+  font-size: 38px;
+  line-height: 1.05;
+}
+
+h2 {
+  margin-bottom: 0;
+  font-size: 18px;
+}
+
+h3 {
+  margin-bottom: 12px;
+  font-size: 15px;
+}
+
+.status-strip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(96px, 1fr));
+  gap: 10px;
+}
+
+.status-strip div,
+.metrics div {
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.78);
+  padding: 12px 14px;
+  border-radius: 8px;
+}
+
+.status-strip span,
+.metrics strong {
+  display: block;
+  font-size: 22px;
+  line-height: 1.1;
+  color: var(--leaf-dark);
+}
+
+.status-strip small,
+.metrics span {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.tool-grid {
+  display: grid;
+  grid-template-columns: minmax(300px, 0.95fr) minmax(360px, 1.25fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.panel {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  box-shadow: var(--shadow);
+  padding: 18px;
+}
+
+.detail-panel {
+  grid-column: 1 / -1;
+}
+
+.panel-head {
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+textarea {
+  width: 100%;
+  min-height: 310px;
+  resize: vertical;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 14px;
+  color: #15221c;
+  background: #fbfdfb;
+  line-height: 1.45;
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 14px;
+}
+
+textarea:focus,
+input:focus,
+select:focus {
+  outline: 2px solid rgba(31, 143, 95, 0.28);
+  border-color: var(--leaf);
+}
+
+.control-row {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr 110px;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+label {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+select,
+input[type="number"] {
+  width: 100%;
+  height: 38px;
+  margin-top: 6px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--ink);
+  padding: 0 10px;
+}
+
+.toggles {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 14px 0;
+}
+
+.toggles label {
+  min-height: 38px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px 10px;
+  background: var(--wash);
+  color: var(--ink);
+}
+
+.primary-button,
+.small-button,
+.icon-button {
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.primary-button {
+  width: 100%;
+  min-height: 46px;
+  background: var(--leaf);
+  color: white;
+  font-weight: 700;
+}
+
+.primary-button:hover {
+  background: var(--leaf-dark);
+}
+
+.small-button,
+.icon-button {
+  min-height: 34px;
+  border: 1px solid var(--line);
+  background: #f7faf7;
+  color: var(--ink);
+  padding: 0 12px;
+}
+
+.icon-button {
+  width: 36px;
+  padding: 0;
+  font-size: 18px;
+}
+
+.button-group {
+  display: flex;
+  gap: 8px;
+}
+
+.note {
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.alerts {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.alert {
+  border-left: 4px solid var(--gold);
+  background: #fff8e8;
+  padding: 10px 12px;
+  border-radius: 6px;
+  color: #4f3a0b;
+  font-size: 13px;
+}
+
+.alert.good {
+  border-left-color: var(--leaf);
+  background: #edf8f0;
+  color: #174b32;
+}
+
+.alert.warn {
+  border-left-color: var(--rose);
+  background: #fff0f3;
+  color: #65303b;
+}
+
+.split {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 18px;
+}
+
+.codon-table {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(142px, 1fr));
+  gap: 8px;
+}
+
+.codon-card,
+.motif-item {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px;
+  background: var(--paper);
+  min-height: 54px;
+}
+
+.codon-card strong {
+  display: block;
+  color: var(--leaf-dark);
+  margin-bottom: 5px;
+}
+
+.codon-card span,
+.motif-item {
+  color: var(--muted);
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.motif-list {
+  display: grid;
+  gap: 8px;
+}
+
+@media (max-width: 860px) {
+  .topbar,
+  .tool-grid,
+  .split {
+    grid-template-columns: 1fr;
+    display: grid;
+  }
+
+  .status-strip,
+  .metrics,
+  .toggles {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .control-row {
+    grid-template-columns: 1fr;
+  }
+
+  h1 {
+    font-size: 30px;
+  }
+}
+
+@media (max-width: 520px) {
+  .app-shell {
+    width: min(100vw - 20px, 1260px);
+    padding: 12px 0;
+  }
+
+  .status-strip,
+  .metrics,
+  .toggles {
+    grid-template-columns: 1fr;
+  }
+
+  textarea {
+    min-height: 230px;
+  }
+}
+
+</style>
+</head>
+<body>
+  <main class="app-shell">
+    <section class="topbar" aria-label="工具标题">
+      <div>
+        <p class="eyebrow">Medicago sativa codon optimizer</p>
+        <h1>紫花苜蓿密码子优化</h1>
+      </div>
+      <div class="status-strip" aria-label="结果概览">
+        <div><span id="inputType">未输入</span><small>序列类型</small></div>
+        <div><span id="gcValue">--</span><small>GC%</small></div>
+        <div><span id="caiValue">--</span><small>CAI-like</small></div>
+      </div>
+    </section>
+
+    <section class="tool-grid">
+      <aside class="panel input-panel">
+        <div class="panel-head">
+          <h2>输入序列</h2>
+          <button id="loadExample" class="icon-button" type="button" title="载入示例序列" aria-label="载入示例序列">↺</button>
+        </div>
+        <textarea id="sequenceInput" spellcheck="false" placeholder="粘贴蛋白序列或 CDS/ORF 序列；FASTA 标题会自动忽略"></textarea>
+        <div class="control-row">
+          <label>
+            品种预设
+            <select id="profileSelect">
+              <option value="consensus">苜蓿通用共识</option>
+              <option value="xinjiangdaye">新疆大叶</option>
+              <option value="zhongmu1">中苜1号</option>
+              <option value="zhongmu4">中苜4号</option>
+              <option value="truncatula">蒺藜苜蓿 A17</option>
+            </select>
+          </label>
+          <label>
+            优化模式
+            <select id="modeSelect">
+              <option value="balanced">平衡优化</option>
+              <option value="max">最高频密码子</option>
+              <option value="gc">GC 目标优先</option>
+            </select>
+          </label>
+          <label>
+            目标 GC%
+            <input id="targetGc" type="number" min="30" max="70" value="45">
+          </label>
+        </div>
+        <div class="toggles">
+          <label><input id="keepStartStop" type="checkbox" checked> 保留起始/终止框架</label>
+          <label><input id="avoidSites" type="checkbox" checked> 标记常见酶切位点</label>
+        </div>
+        <button id="optimizeBtn" class="primary-button" type="button">优化序列</button>
+        <p id="profileSummary" class="note"></p>
+        <p class="note">品种预设依据《苜蓿基因组密码子偏好性分析》中高/低表达基因 RSCU 差异确定的最优密码子表设计；正式合成前仍建议结合载体、限制性位点和目标基因功能区域复核。</p>
+      </aside>
+
+      <section class="panel output-panel">
+        <div class="panel-head">
+          <h2>优化结果</h2>
+          <div class="button-group">
+            <button id="copyBtn" class="small-button" type="button">复制</button>
+            <button id="downloadBtn" class="small-button" type="button">下载 FASTA</button>
+          </div>
+        </div>
+        <textarea id="outputSequence" spellcheck="false" readonly placeholder="优化后的 CDS 会显示在这里"></textarea>
+        <div class="metrics">
+          <div><strong id="lengthMetric">--</strong><span>长度 nt</span></div>
+          <div><strong id="proteinMetric">--</strong><span>氨基酸数</span></div>
+          <div><strong id="changedMetric">--</strong><span>替换密码子</span></div>
+          <div><strong id="motifMetric">--</strong><span>位点提示</span></div>
+        </div>
+      </section>
+
+      <section class="panel detail-panel">
+        <div class="panel-head">
+          <h2>诊断信息</h2>
+        </div>
+        <div id="alerts" class="alerts"></div>
+        <div class="split">
+          <div>
+            <h3>当前品种偏好</h3>
+            <div id="codonTable" class="codon-table"></div>
+          </div>
+          <div>
+            <h3>限制性位点</h3>
+            <div id="motifList" class="motif-list"></div>
+          </div>
+        </div>
+      </section>
+    </section>
+  </main>
+  <script>
+const codonMap = {
+  F: [["TTC", 1.00], ["TTT", 0.82]],
+  L: [["CTC", 1.00], ["CTG", 0.96], ["TTA", 0.72], ["TTG", 0.70], ["CTT", 0.66], ["CTA", 0.54]],
+  I: [["ATC", 1.00], ["ATT", 0.88], ["ATA", 0.58]],
+  M: [["ATG", 1.00]],
+  V: [["GTG", 1.00], ["GTC", 0.96], ["GTT", 0.78], ["GTA", 0.55]],
+  S: [["TCC", 1.00], ["TCT", 0.92], ["AGC", 0.84], ["TCA", 0.74], ["AGT", 0.70], ["TCG", 0.52]],
+  P: [["CCA", 1.00], ["CCT", 0.95], ["CCC", 0.78], ["CCG", 0.50]],
+  T: [["ACC", 1.00], ["ACT", 0.94], ["ACA", 0.86], ["ACG", 0.55]],
+  A: [["GCC", 1.00], ["GCT", 0.94], ["GCA", 0.84], ["GCG", 0.52]],
+  Y: [["TAC", 1.00], ["TAT", 0.82]],
+  H: [["CAC", 1.00], ["CAT", 0.80]],
+  Q: [["CAG", 1.00], ["CAA", 0.88]],
+  N: [["AAC", 1.00], ["AAT", 0.85]],
+  K: [["AAG", 1.00], ["AAA", 0.86]],
+  D: [["GAC", 1.00], ["GAT", 0.87]],
+  E: [["GAG", 1.00], ["GAA", 0.90]],
+  C: [["TGC", 1.00], ["TGT", 0.82]],
+  W: [["TGG", 1.00]],
+  R: [["AGA", 1.00], ["CGT", 0.82], ["AGG", 0.78], ["CGC", 0.74], ["CGA", 0.56], ["CGG", 0.50]],
+  G: [["GGA", 1.00], ["GGT", 0.93], ["GGC", 0.88], ["GGG", 0.62]],
+  "*": [["TAA", 1.00], ["TAG", 0.68], ["TGA", 0.62]]
+};
+
+const profiles = {
+  consensus: {
+    name: "苜蓿通用共识",
+    latin: "Medicago consensus",
+    optimalCount: 23,
+    gc3: "37.99-38.79",
+    enc: "50.893-51.171",
+    note: "综合四种苜蓿共同偏好的 A/T 结尾密码子，适合没有指定品种时使用。",
+    optimal: {
+      F: ["TTT"], L: ["TTA", "TTG"], I: ["ATA"], V: ["GTT", "GTA"],
+      Y: ["TAT"], H: ["CAT"], Q: ["CAA"], K: ["AAA"], D: ["GAT"], E: ["GAA"],
+      S: ["TCA", "AGT"], P: ["CCA"], T: ["ACA"], A: ["GCA"], R: ["AGA"], G: ["GGA"]
+    }
+  },
+  xinjiangdaye: {
+    name: "新疆大叶",
+    latin: "M. sativa cultivar XinJiangDaYe",
+    optimalCount: 28,
+    gc3: "38.50",
+    enc: "51.108",
+    note: "该品种最优密码子较多，兼具 A/T 结尾偏好和少量 G/C 结尾密码子。",
+    optimal: {
+      F: ["TTT"], L: ["TTA", "TTG", "CTG"], I: ["ATT", "ATA"], V: ["GTG"],
+      Y: ["TAT"], H: ["CAT"], Q: ["CAG"], N: ["AAT"], K: ["AAG"], D: ["GAT"], E: ["GAG"],
+      S: ["TCG", "AGT"], P: ["CCT", "CCG"], T: ["ACT", "ACG"], A: ["GCT", "GCA", "GCG"],
+      C: ["TGT"], R: ["CGG", "AGA", "AGG"], G: ["GGG"]
+    }
+  },
+  zhongmu1: {
+    name: "中苜1号",
+    latin: "M. sativa cultivar Zhongmu No.1",
+    optimalCount: 27,
+    gc3: "37.99",
+    enc: "51.171",
+    note: "文章中该品种密码子偏好性最弱，适合采用温和优化，避免过度替换。",
+    optimal: {
+      F: ["TTT"], L: ["TTA", "TTG", "CTG"], I: ["ATA"], V: ["GTT", "GTA"],
+      Y: ["TAT"], H: ["CAT"], Q: ["CAA"], N: ["AAC"], K: ["AAA"], D: ["GAT"], E: ["GAA"],
+      S: ["TCA", "AGT", "AGC"], P: ["CCA"], T: ["ACA", "ACG"], A: ["GCA", "GCG"],
+      C: ["TGT"], R: ["CGC", "AGA"], G: ["GGC", "GGA"]
+    }
+  },
+  zhongmu4: {
+    name: "中苜4号",
+    latin: "M. sativa cultivar Zhongmu No.4",
+    optimalCount: 23,
+    gc3: "38.79",
+    enc: "50.893",
+    note: "该品种最优密码子数量较少，优化时更偏向保留有限高可信偏好。",
+    optimal: {
+      F: ["TTC"], L: ["TTA", "CTT", "CTC", "CTA"], I: ["ATA"], V: ["GTT", "GTC", "GTA"],
+      Y: ["TAC"], H: ["CAC"], Q: ["CAA"], N: ["AAC"], K: ["AAA"], D: ["GAC"], E: ["GAA"],
+      S: ["TCC", "TCA"], P: ["CCA"], T: ["ACA"], A: ["GCA"], R: ["AGA"], G: ["GGA"]
+    }
+  },
+  truncatula: {
+    name: "蒺藜苜蓿 A17",
+    latin: "M. truncatula A17",
+    optimalCount: 30,
+    gc3: "38.66",
+    enc: "51.069",
+    note: "豆科模式材料 A17 的最优密码子数量最多，可作为苜蓿属参考预设。",
+    optimal: {
+      F: ["TTT"], L: ["TTA", "TTG", "CTT", "CTA"], I: ["ATT", "ATA"], V: ["GTT", "GTA"],
+      Y: ["TAT"], H: ["CAT"], Q: ["CAA"], N: ["AAT"], K: ["AAA"], D: ["GAT"], E: ["GAA"],
+      S: ["TCT", "TCA", "AGT"], P: ["CCT", "CCA"], T: ["ACT", "ACA"], A: ["GCT", "GCA"],
+      C: ["TGT"], R: ["AGA", "AGG"], G: ["GGT", "GGA"]
+    }
+  }
+};
+
+const geneticCode = Object.fromEntries(
+  Object.entries(codonMap).flatMap(([aa, codons]) => codons.map(([codon]) => [codon, aa]))
+);
+
+const motifs = [
+  ["EcoRI", "GAATTC"],
+  ["BamHI", "GGATCC"],
+  ["HindIII", "AAGCTT"],
+  ["XhoI", "CTCGAG"],
+  ["BsaI", "GGTCTC"],
+  ["BbsI", "GAAGAC"],
+  ["Poly-A/T", "AAAAAA"],
+  ["Poly-G/C", "GGGGGG"]
+];
+
+const exampleProtein = `>MsXTH-like_example_protein
+MASSSTVLLVLLLAAATAQGQWNPQGYCYFSGGSDENYQALWQQGLG
+GNPVYDQYQKALSSGASLVTFYSGWFDENKQKPGGQWVRTDNTGQ`;
+
+const el = {
+  input: document.getElementById("sequenceInput"),
+  output: document.getElementById("outputSequence"),
+  profile: document.getElementById("profileSelect"),
+  mode: document.getElementById("modeSelect"),
+  targetGc: document.getElementById("targetGc"),
+  keepStartStop: document.getElementById("keepStartStop"),
+  avoidSites: document.getElementById("avoidSites"),
+  optimize: document.getElementById("optimizeBtn"),
+  loadExample: document.getElementById("loadExample"),
+  copy: document.getElementById("copyBtn"),
+  download: document.getElementById("downloadBtn"),
+  inputType: document.getElementById("inputType"),
+  gcValue: document.getElementById("gcValue"),
+  caiValue: document.getElementById("caiValue"),
+  lengthMetric: document.getElementById("lengthMetric"),
+  proteinMetric: document.getElementById("proteinMetric"),
+  changedMetric: document.getElementById("changedMetric"),
+  motifMetric: document.getElementById("motifMetric"),
+  alerts: document.getElementById("alerts"),
+  codonTable: document.getElementById("codonTable"),
+  motifList: document.getElementById("motifList"),
+  profileSummary: document.getElementById("profileSummary")
+};
+
+function cleanSequence(raw) {
+  return raw
+    .split(/\r?\n/)
+    .filter(line => !line.trim().startsWith(">"))
+    .join("")
+    .replace(/[\s0-9]/g, "")
+    .toUpperCase()
+    .replace(/U/g, "T");
+}
+
+function detectType(seq) {
+  if (!seq) return "empty";
+  if (/^[ACGTN]+$/.test(seq) && seq.length >= 3) return "dna";
+  if (/^[ABCDEFGHIKLMNPQRSTVWXYZ*]+$/.test(seq)) return "protein";
+  return "invalid";
+}
+
+function translateDna(seq) {
+  const trimmed = seq.slice(0, seq.length - (seq.length % 3));
+  let protein = "";
+  for (let i = 0; i < trimmed.length; i += 3) {
+    protein += geneticCode[trimmed.slice(i, i + 3)] || "X";
+  }
+  return protein;
+}
+
+function gcPercent(seq) {
+  if (!seq.length) return 0;
+  const gc = (seq.match(/[GC]/g) || []).length;
+  return (gc / seq.length) * 100;
+}
+
+function profileWeight(aa, codon, profile) {
+  const base = codonMap[aa]?.find(([candidate]) => candidate === codon)?.[1] || 0.35;
+  const optimal = profile.optimal[aa] || [];
+  if (optimal.includes(codon)) return Math.min(1, Math.max(0.86, base));
+  return Math.min(0.82, base * 0.68);
+}
+
+function chooseCodon(aa, currentGc, targetGc, mode, profile) {
+  const options = codonMap[aa] || codonMap.X;
+  if (!options) return "NNN";
+  const optimal = profile.optimal[aa] || [];
+  if (mode === "max" && optimal.length) return optimal[0];
+  if (mode === "max") return options[0][0];
+
+  const ranked = [...options].sort((a, b) => {
+    const gcA = gcPercent(a[0]);
+    const gcB = gcPercent(b[0]);
+    const scoreA = profileWeight(aa, a[0], profile) - Math.abs(targetGc - ((currentGc + gcA) / 2)) / 100;
+    const scoreB = profileWeight(aa, b[0], profile) - Math.abs(targetGc - ((currentGc + gcB) / 2)) / 100;
+    return scoreB - scoreA;
+  });
+
+  if (mode === "gc") return ranked[0][0];
+  return ranked.find(item => (profile.optimal[aa] || []).includes(item[0]))?.[0] || ranked[0][0];
+}
+
+function optimizeProtein(protein, targetGc, mode, profile) {
+  let dna = "";
+  for (const aa of protein.replace(/\*/g, "")) {
+    dna += chooseCodon(aa, gcPercent(dna), targetGc, mode, profile);
+  }
+  return dna + "TAA";
+}
+
+function optimizeDna(seq, targetGc, mode, keepStartStop, profile) {
+  const protein = translateDna(seq);
+  let optimized = "";
+  let changed = 0;
+  for (let i = 0; i < protein.length; i += 1) {
+    const aa = protein[i];
+    const original = seq.slice(i * 3, i * 3 + 3);
+    let next = chooseCodon(aa, gcPercent(optimized), targetGc, mode, profile);
+    if (keepStartStop && i === 0 && original === "ATG") next = "ATG";
+    if (keepStartStop && aa === "*") next = original || "TAA";
+    optimized += next;
+    if (original && next !== original) changed += 1;
+  }
+  return { optimized, protein, changed };
+}
+
+function caiLike(seq) {
+  const profile = profiles[el.profile.value] || profiles.consensus;
+  const weights = [];
+  for (let i = 0; i <= seq.length - 3; i += 3) {
+    const codon = seq.slice(i, i + 3);
+    const aa = geneticCode[codon];
+    if (!aa || aa === "*") continue;
+    weights.push(profileWeight(aa, codon, profile));
+  }
+  if (!weights.length) return 0;
+  const logMean = weights.reduce((sum, weight) => sum + Math.log(Math.max(weight, 0.01)), 0) / weights.length;
+  return Math.exp(logMean);
+}
+
+function findMotifs(seq) {
+  return motifs
+    .map(([name, pattern]) => {
+      const positions = [];
+      let index = seq.indexOf(pattern);
+      while (index !== -1) {
+        positions.push(index + 1);
+        index = seq.indexOf(pattern, index + 1);
+      }
+      return { name, pattern, positions };
+    })
+    .filter(item => item.positions.length);
+}
+
+function fastaWrap(seq) {
+  return seq.match(/.{1,60}/g)?.join("\n") || "";
+}
+
+function showAlert(text, type = "") {
+  const div = document.createElement("div");
+  div.className = `alert ${type}`;
+  div.textContent = text;
+  el.alerts.appendChild(div);
+}
+
+function renderProfileSummary() {
+  const profile = profiles[el.profile.value] || profiles.consensus;
+  el.profileSummary.textContent = `${profile.name}（${profile.latin}）：最优密码子 ${profile.optimalCount} 个，GC3 ${profile.gc3}%，ENC ${profile.enc}。${profile.note}`;
+}
+
+function renderCodonTable() {
+  const profile = profiles[el.profile.value] || profiles.consensus;
+  el.codonTable.innerHTML = "";
+  Object.entries(codonMap)
+    .filter(([aa]) => aa !== "*")
+    .forEach(([aa, codons]) => {
+      const optimal = profile.optimal[aa] || [];
+      const card = document.createElement("div");
+      card.className = "codon-card";
+      card.innerHTML = `<strong>${aa}</strong><span>${codons.map(([c, w]) => `${optimal.includes(c) ? "★" : ""}${c} ${profileWeight(aa, c, profile).toFixed(2)}`).join(" · ")}</span>`;
+      el.codonTable.appendChild(card);
+    });
+  renderProfileSummary();
+}
+
+function renderMotifs(found) {
+  el.motifList.innerHTML = "";
+  if (!found.length) {
+    const item = document.createElement("div");
+    item.className = "motif-item";
+    item.textContent = "未检出常见限制性位点";
+    el.motifList.appendChild(item);
+    return;
+  }
+  found.forEach(({ name, pattern, positions }) => {
+    const item = document.createElement("div");
+    item.className = "motif-item";
+    item.textContent = `${name} ${pattern}: ${positions.join(", ")}`;
+    el.motifList.appendChild(item);
+  });
+}
+
+function runOptimization() {
+  const seq = cleanSequence(el.input.value);
+  const type = detectType(seq);
+  const target = Number(el.targetGc.value) || 45;
+  const profile = profiles[el.profile.value] || profiles.consensus;
+  el.alerts.innerHTML = "";
+
+  if (type === "empty") {
+    showAlert("请先输入蛋白序列或 CDS 序列。", "warn");
+    return;
+  }
+  if (type === "invalid") {
+    showAlert("序列包含无法识别的字符，请检查是否混入中文、标点或非标准氨基酸符号。", "warn");
+    return;
+  }
+
+  let optimized = "";
+  let protein = "";
+  let changed = "--";
+
+  if (type === "protein") {
+    protein = seq.replace(/\*/g, "");
+    optimized = optimizeProtein(protein, target, el.mode.value, profile);
+    changed = "新建";
+    el.inputType.textContent = "蛋白";
+  } else {
+    if (seq.length % 3 !== 0) showAlert("输入 CDS 长度不是 3 的倍数，末尾不完整密码子未参与翻译判断。", "warn");
+    const result = optimizeDna(seq.slice(0, seq.length - (seq.length % 3)), target, el.mode.value, el.keepStartStop.checked, profile);
+    optimized = result.optimized;
+    protein = result.protein.replace(/\*/g, "");
+    changed = result.changed;
+    el.inputType.textContent = "CDS";
+  }
+
+  const gc = gcPercent(optimized);
+  const cai = caiLike(optimized);
+  const found = el.avoidSites.checked ? findMotifs(optimized) : [];
+
+  el.output.value = `>alfalfa_codon_optimized|profile=${profile.name}|GC=${gc.toFixed(1)}|CAI_like=${cai.toFixed(3)}\n${fastaWrap(optimized)}`;
+  el.gcValue.textContent = gc.toFixed(1);
+  el.caiValue.textContent = cai.toFixed(3);
+  el.lengthMetric.textContent = optimized.length;
+  el.proteinMetric.textContent = protein.length;
+  el.changedMetric.textContent = changed;
+  el.motifMetric.textContent = found.length;
+
+  if (gc < 38 || gc > 58) showAlert(`优化后 GC 为 ${gc.toFixed(1)}%，建议根据载体和表达系统继续微调。`, "warn");
+  else showAlert(`优化完成，GC 为 ${gc.toFixed(1)}%，CAI-like 评分为 ${cai.toFixed(3)}。`, "good");
+  if (found.length) showAlert("检测到常见限制性位点，合成或克隆前建议进一步规避。");
+  renderMotifs(found);
+  renderCodonTable();
+}
+
+async function copyOutput() {
+  if (!el.output.value) return;
+  await navigator.clipboard.writeText(el.output.value);
+  showAlert("结果已复制到剪贴板。", "good");
+}
+
+function downloadOutput() {
+  if (!el.output.value) return;
+  const blob = new Blob([el.output.value], { type: "text/plain;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = "alfalfa_codon_optimized.fasta";
+  anchor.click();
+  URL.revokeObjectURL(url);
+}
+
+el.optimize.addEventListener("click", runOptimization);
+el.loadExample.addEventListener("click", () => {
+  el.input.value = exampleProtein;
+  runOptimization();
+});
+el.copy.addEventListener("click", copyOutput);
+el.download.addEventListener("click", downloadOutput);
+["input", "change"].forEach(eventName => {
+  el.input.addEventListener(eventName, () => {
+    if (el.input.value.trim()) runOptimization();
+  });
+  el.mode.addEventListener(eventName, runOptimization);
+  el.profile.addEventListener(eventName, runOptimization);
+  el.targetGc.addEventListener(eventName, runOptimization);
+});
+el.keepStartStop.addEventListener("change", runOptimization);
+el.avoidSites.addEventListener("change", runOptimization);
+
+renderCodonTable();
+renderMotifs([]);
+el.input.value = exampleProtein;
+runOptimization();
+
+</script>
+</body>
+</html>
+
